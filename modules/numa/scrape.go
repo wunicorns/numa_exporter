@@ -23,8 +23,9 @@ import (
 */
 
 const (
-	NODE_COUNT_FILE    = "/sys/devices/system/node/online"
-	NUMA_SCRAPE_TARGET = "/sys/devices/system/node/%s/numastat"
+	NODE_ONLINE     = "/sys/devices/system/node/online"
+	NUMASTAT_SCRAPE = "/sys/devices/system/node/%s/numastat"
+	MEMINFO_SCRAPE  = "/sys/devices/system/node/%s/meminfo"
 )
 
 type Numastats []Numastat
@@ -37,11 +38,11 @@ type Numastat struct {
 
 func Scrape() (Numastats, error) {
 	var items Numastats
-	if err := foundFile(NODE_COUNT_FILE); err != nil {
+	if err := foundFile(NODE_ONLINE); err != nil {
 		return nil, err
 	}
 
-	cnt, err := os.ReadFile(NODE_COUNT_FILE)
+	cnt, err := os.ReadFile(NODE_ONLINE)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +54,7 @@ func Scrape() (Numastats, error) {
 	}
 	for i := 0; i <= lastNum; i++ {
 		nodeName := fmt.Sprintf("node%d", i)
-		filepath := fmt.Sprintf(NUMA_SCRAPE_TARGET, nodeName)
+		filepath := fmt.Sprintf(NUMASTAT_SCRAPE, nodeName)
 		contents, err := fileContent(filepath)
 		if err != nil {
 			continue
@@ -101,7 +102,7 @@ func foundFile(filepath string) error {
 		return err
 	}
 	if fsInfo.IsDir() {
-		return errors.New("found directory")
+		return errors.New("file not found, found directory")
 	}
 	return nil
 }

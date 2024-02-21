@@ -1,0 +1,13 @@
+[Unit]
+Description=NUMA_Exporter service
+Documentation=https://github.com/wunicorns/numa_exporter
+After=network-online.target
+
+[Service]
+User=root
+Restart=on-failure
+
+ExecStart=/usr/bin/numa_exporter
+
+[Install]
+WantedBy=multi-user.target
