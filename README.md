@@ -3,11 +3,19 @@
 ## run 
 
 ```
+go mod tidy
 go run main.go
 ```
 
+## system
+
 ```
-# cat /sys/devices/system/node/node0/numastat
+$ cat /sys/devices/system/node/online
+0-1
+```
+
+```
+$ cat /sys/devices/system/node/node0/numastat
 numa_hit 11522122
 numa_miss 0
 numa_foreign 0
@@ -17,7 +25,7 @@ other_node 7643
 ```
 
 ```
-# cat /sys/devices/system/node/node0/meminfo
+$ cat /sys/devices/system/node/node0/meminfo
 Node 0 MemTotal:       65165920 kB
 Node 0 MemFree:        61730760 kB
 Node 0 MemUsed:         3435160 kB
