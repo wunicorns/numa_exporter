@@ -9,57 +9,6 @@ import (
 	"strings"
 )
 
-/*
-	0, 0-1
-*/
-
-/*
-   numa_hit 6422219
-   numa_miss 0
-   numa_foreign 0
-   interleave_hit 6460
-   local_node 6417749
-   other_node 4470
-*/
-
-/*
-Node 0 MemTotal:        7856504 kB
-Node 0 MemFree:         1400616 kB
-Node 0 MemUsed:         6455888 kB
-Node 0 SwapCached:            0 kB
-Node 0 Active:          1238936 kB
-Node 0 Inactive:        4570064 kB
-Node 0 Active(anon):      11688 kB
-Node 0 Inactive(anon):  1871708 kB
-Node 0 Active(file):    1227248 kB
-Node 0 Inactive(file):  2698356 kB
-Node 0 Unevictable:          64 kB
-Node 0 Mlocked:              64 kB
-Node 0 Dirty:                 0 kB
-Node 0 Writeback:             0 kB
-Node 0 FilePages:       3958580 kB
-Node 0 Mapped:           724772 kB
-Node 0 AnonPages:       1765740 kB
-Node 0 Shmem:             32976 kB
-Node 0 KernelStack:       10640 kB
-Node 0 PageTables:        19588 kB
-Node 0 SecPageTables:         0 kB
-Node 0 NFS_Unstable:          0 kB
-Node 0 Bounce:                0 kB
-Node 0 WritebackTmp:          0 kB
-Node 0 KReclaimable:     251456 kB
-Node 0 Slab:             398876 kB
-Node 0 SReclaimable:     251456 kB
-Node 0 SUnreclaim:       147420 kB
-Node 0 AnonHugePages:   1292288 kB
-Node 0 ShmemHugePages:        0 kB
-Node 0 ShmemPmdMapped:        0 kB
-Node 0 FileHugePages:        0 kB
-Node 0 FilePmdMapped:        0 kB
-Node 0 HugePages_Total:     0
-Node 0 HugePages_Free:      0
-Node 0 HugePages_Surp:      0
-*/
 const (
 	NODE_ONLINE     = "/sys/devices/system/node/online"
 	NUMASTAT_SCRAPE = "/sys/devices/system/node/%s/numastat"
@@ -145,9 +94,20 @@ func Scrape() (Numastats, error) {
 				numastat.Type = &typeValue
 			}
 
-			val, err := strconv.ParseFloat(strings.Split(lines[1], " ")[0], 64)
-			if err == nil {
-				numastat.Value = val
+			l := strings.TrimLeft(lines[1], " ")
+			vals := strings.Split(l, " ")
+			numastat.Value, err = strconv.ParseFloat(vals[0], 64)
+			if len(vals) > 2 {
+				switch vals[1] {
+				case "kb":
+					numastat.Value = numastat.Value * 1024
+				case "mb":
+					numastat.Value = numastat.Value * 1024 * 1024
+				case "gb":
+					numastat.Value = numastat.Value * 1024 * 1024 * 1024
+				case "tb":
+					numastat.Value = numastat.Value * 1024 * 1024 * 1024 * 1024
+				}
 			}
 
 			return &numastat
